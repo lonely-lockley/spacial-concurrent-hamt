@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id "me.champeau.jmh" version "0.7.2"
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 21
+targetCompatibility = 21
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'com.github.romix', name: 'java-concurrent-hash-trie-map', version: '0.2.23'
+    implementation group: 'com.uber', name: 'h3', version: '4.1.1'
+    testImplementation 'org.testng:testng:7.9.0'
+    testImplementation group: 'com.github.jbellis', name: 'jamm', version: '0.4.0'
+}
+
+test {
+    useTestNG()
+}
+
+jmh {
+    failOnError = true
+    duplicateClassesStrategy = DuplicatesStrategy.WARN
+}
