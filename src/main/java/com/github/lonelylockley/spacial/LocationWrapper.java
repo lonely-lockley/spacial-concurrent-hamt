@@ -19,7 +19,7 @@ class LocationWrapper<T, V> {
         cellId.compareAndSet(fromCellId, toCellId);
     }
 
-    public H3CellId<T> unwrap() {
+    public H3CellId<T> cellId() {
         return cellId.get();
     }
 
@@ -30,6 +30,10 @@ class LocationWrapper<T, V> {
         else {
             return null;
         }
+    }
+
+    public V unwrap() {
+        return value.get();
     }
 
     public void update(V value) {

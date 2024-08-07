@@ -31,28 +31,23 @@ public class LocationTracker<T, V> implements Tracker<T, V> {
      * {@inheritDoc}
      */
     @Override
-    public V setLocation(final String cellId, final T businessEntityId, final V value) {
+    public V startTracking(final String cellId, final T businessEntityId, final V value) {
         final var h3CellId = new H3CellId<>(cellId, businessEntityId);
         final var res = businessEntityIndex.computeIfAbsent(businessEntityId, (key) -> {
                     var wrapped = new LocationWrapper<>(h3CellId, value);
                     locations.put(h3CellId, wrapped);
                     return wrapped;
                 });
-        if (res == null) {
-            return null;
-        }
-        else {
-            return res.unwrap(h3CellId);
-        }
+        return res.unwrap(h3CellId);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean moveLocation(final T businessEntityId, final H3CellId<T> toCellId) {
+    public boolean updateLocation(final T businessEntityId, final H3CellId<T> toCellId) {
         final var res = businessEntityIndex.computeIfPresent(businessEntityId, (key, wrapper) -> {
-            final var fromCellId = wrapper.unwrap();
+            final var fromCellId = wrapper.cellId();
             locations.put(toCellId, wrapper);
             wrapper.swapCellId(fromCellId, toCellId);
             locations.remove(fromCellId);
@@ -65,13 +60,13 @@ public class LocationTracker<T, V> implements Tracker<T, V> {
      * {@inheritDoc}
      */
     @Override
-    public V removeLocation(final T businessEntityId) {
+    public V finishTracking(final T businessEntityId) {
         var wrapper = businessEntityIndex.remove(businessEntityId);
         if (wrapper == null) {
             return null;
         }
         else {
-            var cellId = wrapper.unwrap();
+            var cellId = wrapper.cellId();
             return locations.remove(cellId).unwrap(cellId);
         }
     }
@@ -81,6 +76,23 @@ public class LocationTracker<T, V> implements Tracker<T, V> {
             wrapper.update(value);
             return wrapper;
         });
+    }
+
+    @Override
+    public boolean isTracking(T businessEntityId) {
+        return businessEntityIndex.containsKey(businessEntityId);
+    }
+
+    @Override
+    public H3CellId<T> getLocation(T businessEntityId) {
+        var lw = businessEntityIndex.get(businessEntityId);
+        return lw == null ? null : lw.cellId();
+    }
+
+    @Override
+    public V getValue(T businessEntityId) {
+        var lw = businessEntityIndex.get(businessEntityId);
+        return lw == null ? null : lw.unwrap(lw.cellId());
     }
 
     /**

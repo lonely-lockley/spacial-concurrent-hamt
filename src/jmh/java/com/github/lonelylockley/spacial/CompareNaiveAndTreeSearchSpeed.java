@@ -74,7 +74,7 @@ public class CompareNaiveAndTreeSearchSpeed extends TestBase<UUID> {
                     values.add(new AbstractMap.SimpleEntry<>(cid3, cell3.getCellId()));
                     break;
             }
-            concurrentSpacialHamt.setLocation(cellId.getCellId(), cellId.getBusinessEntityId(), i);
+            concurrentSpacialHamt.startTracking(cellId.getCellId(), cellId.getBusinessEntityId(), i);
         }
     }
 

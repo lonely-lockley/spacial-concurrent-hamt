@@ -16,22 +16,28 @@ public interface Tracker<T, V> {
       *                         location collision
       * @param value a business entity to store
       */
-     V setLocation(String cellId, T businessEntityId, V value);
+     V startTracking(String cellId, T businessEntityId, V value);
+
+     boolean isTracking(T businessEntityId);
+
+     H3CellId<T> getLocation(T businessEntityId);
 
      /**
       * Change a cell of a business object
       * @param fromCellId original cell id where object is stored now
       * @param toCellId a new cell id
       */
-     boolean moveLocation(T businessEntityId, H3CellId<T> toCellId);
+     boolean updateLocation(T businessEntityId, H3CellId<T> toCellId);
 
      /**
       * Remove a registered object from a current location
       * @param cellId cell id locating business object
       */
-     V removeLocation(T businessEntityId);
+     V finishTracking(T businessEntityId);
 
-     void updateValue(final T businessEntityId, final V value);
+     void updateValue(T businessEntityId, V value);
+
+     V getValue(T businessEntityId);
 
      Collection<Entry<H3CellId<T>, V>> getAllWithinRing(String cellId, int resolution, int range);
      Collection<Entry<H3CellId<T>, V>> getAllWithinCircle(String cellId, int resolution, int range);

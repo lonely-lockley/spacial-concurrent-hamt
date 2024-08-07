@@ -15,7 +15,7 @@ public class TestTrackerSearchOps extends TestBase<String> {
 
         for (int i = 0; i < 10000; i++) {
             var cellId = generateNonRandomCellFullRes(54, String.valueOf(i));
-            Assert.assertNotNull(trk.setLocation(cellId.getCellId(), cellId.getBusinessEntityId(), i));
+            Assert.assertNotNull(trk.startTracking(cellId.getCellId(), cellId.getBusinessEntityId(), i));
             values.add(cellId);
         }
 
