@@ -5,9 +5,11 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
 
-public class TestTrackerSearchOps extends TestBase<String> {
+public class TestTrackerGetWithinOps extends TestBase<String> {
 
     // res 7 center 873e628e2ffffff (8f3e628e2881400)
     private final H3CellId<String> center = new H3CellId<>("8f3e628e2881400", "00");
@@ -56,8 +58,8 @@ public class TestTrackerSearchOps extends TestBase<String> {
     }
 
     @Test
-    public void testFindAroundInSingleCell() {
-        var res = trk.findAround(center.getCellId(), (cid, value) -> true, 7, 0, 100);
+    public void testGetAllWithinCircle() {
+        var res = trk.getAllWithinCircle(center.getCellId(), 7, 0);
         Assert.assertEquals(res.size(), 3);
         var set = new HashSet<>(ring0);
         for (Map.Entry<H3CellId<String>, Integer> entry : res) {
@@ -68,8 +70,8 @@ public class TestTrackerSearchOps extends TestBase<String> {
     }
 
     @Test
-    public void testFindAroundInRadius1() {
-        var res = trk.findAround(center.getCellId(), (cid, value) -> true, 7, 1, 100);
+    public void testGetAllWithinCircleInRadius1() {
+        var res = trk.getAllWithinCircle(center.getCellId(), 7, 1);
         Assert.assertEquals(res.size(), 9);
         var set = new HashSet<>(ring0);
         set.addAll(ring1);
@@ -81,8 +83,8 @@ public class TestTrackerSearchOps extends TestBase<String> {
     }
 
     @Test
-    public void testFindAroundInRadius2() {
-        var res = trk.findAround(center.getCellId(), (cid, value) -> true, 7, 2, 100);
+    public void testGetAllWithinCircleInRadius2() {
+        var res = trk.getAllWithinCircle(center.getCellId(), 7, 2);
         Assert.assertEquals(res.size(), 21);
         var set = new HashSet<>(ring0);
         set.addAll(ring1);
@@ -95,30 +97,36 @@ public class TestTrackerSearchOps extends TestBase<String> {
     }
 
     @Test
-    public void testFindAroundWithLimit() {
-        var res = trk.findAround(center.getCellId(), (cid, value) -> true, 7, 0, 1);
-        Assert.assertEquals(res.size(), 1);
-        Assert.assertEquals(((List<Map.Entry<H3CellId<String>, Integer>>) res).getFirst().getKey(), ring0.get(1));
-        Assert.assertEquals(((List<Map.Entry<H3CellId<String>, Integer>>) res).getFirst().getValue(), 0);
-
-        res = trk.findAround(center.getCellId(), (cid, value) -> true, 7, 1, 1);
-        Assert.assertEquals(res.size(), 1);
-        Assert.assertEquals(((List<Map.Entry<H3CellId<String>, Integer>>) res).getFirst().getKey(), ring0.get(1));
-        Assert.assertEquals(((List<Map.Entry<H3CellId<String>, Integer>>) res).getFirst().getValue(), 0);
-
-        res = trk.findAround(center.getCellId(), (cid, value) -> true, 7, 2, 1);
-        Assert.assertEquals(res.size(), 1);
-        Assert.assertEquals(((List<Map.Entry<H3CellId<String>, Integer>>) res).getFirst().getKey(), ring0.get(1));
-        Assert.assertEquals(((List<Map.Entry<H3CellId<String>, Integer>>) res).getFirst().getValue(), 0);
+    public void testGetAllWithinSingleCell() {
+        var res = trk.getAllWithinRing(center.getCellId(), 7, 0);
+        Assert.assertEquals(res.size(), 3);
+        var set = new HashSet<>(ring0);
+        for (Map.Entry<H3CellId<String>, Integer> entry : res) {
+            Assert.assertEquals(entry.getValue(), 0);
+            Assert.assertTrue(set.remove(entry.getKey()));
+        }
+        Assert.assertEquals(0, set.size());
     }
 
     @Test
-    public void testFindAroundWithPredicate() {
-        var res = trk.findAround(center.getCellId(), (cid, value) -> value == 1, 7, 2, 100);
+    public void testGetAllWithinRingInRadius1() {
+        var res = trk.getAllWithinRing(center.getCellId(), 7, 1);
         Assert.assertEquals(res.size(), 6);
         var set = new HashSet<>(ring1);
         for (Map.Entry<H3CellId<String>, Integer> entry : res) {
             Assert.assertEquals(entry.getValue(), 1);
+            Assert.assertTrue(set.remove(entry.getKey()));
+        }
+        Assert.assertEquals(0, set.size());
+    }
+
+    @Test
+    public void testGetAllWithinRingInRadius2() {
+        var res = trk.getAllWithinRing(center.getCellId(), 7, 2);
+        Assert.assertEquals(res.size(), 12);
+        var set = new HashSet<>(ring2);
+        for (Map.Entry<H3CellId<String>, Integer> entry : res) {
+            Assert.assertEquals(entry.getValue(), 2);
             Assert.assertTrue(set.remove(entry.getKey()));
         }
         Assert.assertEquals(0, set.size());

@@ -119,4 +119,22 @@ public class TestTrackerBasicOps extends TestBase<String> {
         Assert.assertNull(trk.getValue(tracked.getBusinessEntityId()));
     }
 
+    @Test
+    public void testGetAllBusinessEntitiesLocations() {
+        Tracker<String, Integer> trk = new LocationTracker<>();
+        final var values = new ArrayList<H3CellId<String>>(10000);
+        for (int i = 0; i < 10000; i++) {
+            var cellId = generateNonRandomCellFullRes(120, String.valueOf(i));
+            Assert.assertNotNull(trk.startTracking(cellId.getCellId(), cellId.getBusinessEntityId(), i));
+            values.add(cellId);
+        }
+
+        var res = trk.getAllBusinessEntitiesLocations();
+        for (H3CellId<String> cellId : values) {
+            var v = res.get(cellId.getBusinessEntityId());
+            Assert.assertNotNull(v);
+            Assert.assertEquals(v, cellId);
+        }
+    }
+
 }

@@ -162,8 +162,8 @@ public class LocationTracker<T, V> implements Tracker<T, V> {
         var trimmed = H3CellId.trimToResolution(cellId, resolution);
         var snapshot = locations.readOnlySnapshot();
         var result = new ArrayList<Map.Entry<H3CellId<T>, V>>(limit);
-        for (int r = 0; r < range; r++) {
-            var ring = h3.gridRingUnsafe(trimmed, range).iterator();
+        for (int r = 0; r <= range; r++) {
+            var ring = h3.gridRingUnsafe(trimmed, r).iterator();
             while (result.size() < limit && ring.hasNext()) {
                 var ringData = snapshot.subTree(new H3CellId<>(ring.next(), null)).entrySet().iterator();
                 while (result.size() < limit && ringData.hasNext()) {
