@@ -1,7 +1,7 @@
-# Spacial Concurrent Hash Trie Map
+# Spatial Concurrent Hash Trie Map
 
 ## This Project
-`SpacialConcurrentTrieMap` is an adaptation of [romix / java-concurrent-hash-trie-map](https://github.com/romix/java-concurrent-hash-trie-map) that uses H3 cell identifiers as the map hierarchical keys. It allows performing various spacial operation at any resolution. This data structure keeps all properties of the original implementation.<br />
+`SpatialConcurrentTrieMap` is an adaptation of [romix / java-concurrent-hash-trie-map](https://github.com/romix/java-concurrent-hash-trie-map) that uses H3 cell identifiers as the map hierarchical keys. It allows performing various spatial operation at any resolution. This data structure keeps all properties of the original implementation.<br />
 `Tracker` is a demonstration of how a set of moving objects may be tracked and searched using the basic map as an underlying storage.
 
 Please note, that since H3 cell id has more levels than an average hash trie (base cell + 15 resolution levels), basic map operations are expected to be slower that in the original implementation. Performance test results to compare various implementations will be added later.
@@ -22,7 +22,7 @@ H3 stands for "Hexagonal Hierarchical Spatial Index" - a geospatial indexing sys
 
 ## Disclaimer
 
-This code is writted as a demonstration of an idea how H3 hierarchy in a form of a prefix-tree may be utilized for the efficient spacial search. This implementation is not distributed as a maven dependency currently.
+This code is writted as a demonstration of an idea how H3 hierarchy in a form of a prefix-tree may be utilized for the efficient spatial search. This implementation is not distributed as a maven dependency currently.
 
 ## License
 
