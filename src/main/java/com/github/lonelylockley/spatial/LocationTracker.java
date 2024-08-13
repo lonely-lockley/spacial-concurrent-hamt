@@ -4,10 +4,7 @@ import com.github.lonelylockley.spatial.ctrie.H3CellId;
 import com.github.lonelylockley.spatial.ctrie.SpatialConcurrentTrieMap;
 import com.uber.h3core.H3Core;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -15,9 +12,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implements Tracker<T, V> {
+public class LocationTracker<T, V> implements Tracker<T, V> {
 
     private final ConcurrentHashMap<T, H3CellId<T>> businessEntityIndex = new ConcurrentHashMap<>();
+    private final SpatialConcurrentTrieMap<T, V> locations = new SpatialConcurrentTrieMap<>();
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Lock writeLock = readWriteLock.writeLock();
     private final Lock readLock = readWriteLock.readLock();
@@ -38,10 +36,10 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
     @Override
     public V startTracking(final String cellId, final T businessEntityId, final V value) {
         final var h3CellId = new H3CellId<>(cellId, businessEntityId);
-        final var res = businessEntityIndex.computeIfAbsent(businessEntityId, (key) -> {
-                    put(h3CellId, value);
-                    return h3CellId;
-                });
+        businessEntityIndex.computeIfAbsent(businessEntityId, (key) -> {
+            locations.put(h3CellId, value);
+            return h3CellId;
+        });
         return value;
     }
 
@@ -53,7 +51,7 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
         final var res = businessEntityIndex.computeIfPresent(businessEntityId, (key, fromCellId) -> {
             writeLock.lock();
             {
-                put(toCellId, remove(fromCellId));
+                locations.put(toCellId, locations.remove(fromCellId));
             }
             writeLock.unlock();
             return toCellId;
@@ -71,13 +69,13 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
             return null;
         }
         else {
-            return remove(cellId);
+            return locations.remove(cellId);
         }
     }
 
     public void updateValue(final T businessEntityId, final V value) {
         businessEntityIndex.computeIfPresent(businessEntityId, (key, cellId) -> {
-            put(cellId, value);
+            locations.put(cellId, value);
             return cellId;
         });
     }
@@ -99,7 +97,7 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
             return null;
         }
         else {
-            return get(cellId);
+            return locations.get(cellId);
         }
     }
 
@@ -112,7 +110,7 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
         SpatialConcurrentTrieMap<T, V> snapshot;
         readLock.lock();
         {
-            snapshot = readOnlySnapshot();
+            snapshot = locations.readOnlySnapshot();
         }
         readLock.unlock();
         var ring = h3.gridRingUnsafe(trimmed, range);
@@ -141,7 +139,7 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
         SpatialConcurrentTrieMap<T, V> snapshot;
         readLock.lock();
         {
-            snapshot = readOnlySnapshot();
+            snapshot = locations.readOnlySnapshot();
         }
         readLock.unlock();
         var circle = h3.gridDiskUnsafe(trimmed, range);
@@ -166,7 +164,8 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
      */
     @Override
     public Map<T, H3CellId<T>> getAllBusinessEntitiesLocations() {
-        return keySet()
+        return locations
+                .keySet()
                 .stream()
                 .map(kv -> new AbstractMap.SimpleImmutableEntry<>(kv.getBusinessEntityId(), kv)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y));
     }
@@ -180,14 +179,15 @@ public class LocationTracker<T, V> extends SpatialConcurrentTrieMap<T, V> implem
         SpatialConcurrentTrieMap<T, V> snapshot;
         readLock.lock();
         {
-            snapshot = readOnlySnapshot();
+            snapshot = locations.readOnlySnapshot();
         }
         readLock.unlock();
         var result = new ArrayList<Map.Entry<H3CellId<T>, V>>(limit);
         for (int r = 0; r <= range; r++) {
-            var ring = h3.gridRingUnsafe(trimmed, r).iterator();
+            var ring = (range == 0) ? Collections.singleton(trimmed).iterator() : h3.gridRingUnsafe(trimmed, r).iterator();
             while (result.size() < limit && ring.hasNext()) {
-                var ringData = snapshot.subTree(new H3CellId<>(ring.next(), null)).entrySet().iterator();
+                var nxt = ring.next();
+                var ringData = snapshot.subTree(new H3CellId<>(nxt, null)).entrySet().iterator();
                 while (result.size() < limit && ringData.hasNext()) {
                     var entry = ringData.next();
                     var key = entry.getKey();

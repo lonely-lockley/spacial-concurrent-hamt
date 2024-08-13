@@ -9,19 +9,71 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TestMultithreadedTrackAndSearch extends TestBase<String> {
+public class TestMultiThreadTrackAndSearch extends TestBase<String> {
 
-    private static final int RETRIES = 10;
-    private static final int N_THREADS = 10;
+    private static final int RETRIES = 5;
     private static final int COUNT = 50000;
 
-    @Test
-    public void testNoDuplicates() {
+    private int N_THREADS = 0;
+
+    @Test(priority = 1)
+    public void testNoDuplicates2Theads() {
+        N_THREADS = 2;
+        System.out.println("Starting testNoDuplicates for " + N_THREADS + " threads");
         for (int i = 0; i < RETRIES; i++) {
             var start = System.currentTimeMillis();
             multiThreadedTrackAndSearch();
-            System.out.println("50000 iterations: " + (System.currentTimeMillis() - start));
+            System.out.println(COUNT + " iterations: " + (System.currentTimeMillis() - start) + "ms");
         }
+        System.out.println();
+    }
+
+    @Test(priority = 2)
+    public void testNoDuplicates4Theads() {
+        N_THREADS = 4;
+        System.out.println("Starting testNoDuplicates for " + N_THREADS + " threads");
+        for (int i = 0; i < RETRIES; i++) {
+            var start = System.currentTimeMillis();
+            multiThreadedTrackAndSearch();
+            System.out.println(COUNT + " iterations: " + (System.currentTimeMillis() - start) + "ms");
+        }
+        System.out.println();
+    }
+
+    @Test(priority = 3)
+    public void testNoDuplicates6Theads() {
+        N_THREADS = 6;
+        System.out.println("Starting testNoDuplicates for " + N_THREADS + " threads");
+        for (int i = 0; i < RETRIES; i++) {
+            var start = System.currentTimeMillis();
+            multiThreadedTrackAndSearch();
+            System.out.println(COUNT + " iterations: " + (System.currentTimeMillis() - start) + "ms");
+        }
+        System.out.println();
+    }
+
+    @Test(priority = 4)
+    public void testNoDuplicates8Theads() {
+        N_THREADS = 8;
+        System.out.println("Starting testNoDuplicates for " + N_THREADS + " threads");
+        for (int i = 0; i < RETRIES; i++) {
+            var start = System.currentTimeMillis();
+            multiThreadedTrackAndSearch();
+            System.out.println(COUNT + " iterations: " + (System.currentTimeMillis() - start) + "ms");
+        }
+        System.out.println();
+    }
+
+    @Test(priority = 5)
+    public void testNoDuplicates10Theads() {
+        N_THREADS = 10;
+        System.out.println("Starting testNoDuplicates for " + N_THREADS + " threads");
+        for (int i = 0; i < RETRIES; i++) {
+            var start = System.currentTimeMillis();
+            multiThreadedTrackAndSearch();
+            System.out.println(COUNT + " iterations: " + (System.currentTimeMillis() - start) + "ms");
+        }
+        System.out.println();
     }
 
     private H3CellId<String> createCell(String businessEntityId) {
@@ -51,7 +103,7 @@ public class TestMultithreadedTrackAndSearch extends TestBase<String> {
                         //trk.updateValue(businessEntityId, j);
                         if (!res) {
                             errorCount.incrementAndGet();
-                            Assert.assertTrue(res);
+                            Assert.fail("businessEntityIndex update was not successful after location update");
                         }
                     }
                     else {
@@ -60,7 +112,7 @@ public class TestMultithreadedTrackAndSearch extends TestBase<String> {
                         var res = trk.findAround(cellId.getCellId(), (cid, value) -> true, 7, 0, 100);
                         if (res.size() != N_THREADS / 2) {
                             errorCount.incrementAndGet();
-                            Assert.assertEquals(res.size(), N_THREADS / 2);
+                            Assert.fail("subTree result returned unexpected set size. Expected [" + (N_THREADS / 2) + "] but got [" + res.size() + "]");
                         }
                     }
                 }

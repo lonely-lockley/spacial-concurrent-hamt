@@ -114,14 +114,14 @@ public class BranchNode<T, V> extends BaseNode<T, V> {
         return new BranchNode<T, V>(bitmapLow, bitmapHigh, narr, ngen, res);
     }
 
-    protected BranchNode<T, V> toCompressedInternal(final SpatialConcurrentTrieMap<T, V> ct, int lev, Gen gen) {
+    protected BranchNode<T, V> toCompressedInternal(final SpatialConcurrentTrieMap<T, V> instance, int offset, Gen gen) {
         int i = 0;
         BaseNode[] arr = array;
         BaseNode[] tmparray = new BaseNode[arr.length];
         while (i < arr.length) { // construct new bitmap
             BaseNode<T, V> sub = arr[i];
             if (sub instanceof NodeWrapper<T, V> in) {
-                BaseNode<T, V> inodemain = in.getGCAS(ct);
+                BaseNode<T, V> inodemain = in.getGCAS(instance);
                 assert (inodemain != null);
                 tmparray[i] = resurrect(in, inodemain);
             }
@@ -139,8 +139,8 @@ public class BranchNode<T, V> extends BaseNode<T, V> {
     // - otherwise, if there is at least one non-null node below, returns the version of this node with at least some null-inodes
     // removed (those existing when the op began)
     // - if there are only null-i-nodes below, returns null
-    protected BaseNode<T, V> toCompressed(final SpatialConcurrentTrieMap<T, V> ct, int lev, Gen gen) {
-        return toCompressedInternal(ct, lev, gen).toContracted();
+    protected BaseNode<T, V> toCompressed(final SpatialConcurrentTrieMap<T, V> instance, int offset, Gen gen) {
+        return toCompressedInternal(instance, offset, gen).toContracted();
     }
 
     private BaseNode<T, V> resurrect(final NodeWrapper<T, V> inode, final BaseNode<T, V> inodemain) {

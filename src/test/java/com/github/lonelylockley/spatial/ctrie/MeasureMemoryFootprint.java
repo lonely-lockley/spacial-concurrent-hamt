@@ -9,31 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MeasureMemoryFootprint extends TestBase<String> {
 
-    private String sizeToHumanReadable(long size) {
-        final long kilo = 1024;
-        final long mega = kilo * kilo;
-        final long giga = mega * kilo;
-        final long tera = giga * kilo;
-
-        String s = "";
-        double kb = (double)size / kilo;
-        double mb = kb / kilo;
-        double gb = mb / kilo;
-        double tb = gb / kilo;
-        if(size < kilo) {
-            s = size + " Bytes";
-        } else if(size >= kilo && size < mega) {
-            s =  String.format("%.2f", kb) + " KB";
-        } else if(size >= mega && size < giga) {
-            s = String.format("%.2f", mb) + " MB";
-        } else if(size >= giga && size < tera) {
-            s = String.format("%.2f", gb) + " GB";
-        } else if(size >= tera) {
-            s = String.format("%.2f", tb) + " TB";
-        }
-        return s;
-    }
-
     private void printResults(long chmTotal, long chTotal, long cshTotal, int size) {
         System.out.printf("%s size is %s with %s elements%n", "concurrentHashMap", sizeToHumanReadable(chmTotal), size);
         System.out.printf("%s size is %s with %s elements%n", "concurrentHamt", sizeToHumanReadable(chTotal), size);

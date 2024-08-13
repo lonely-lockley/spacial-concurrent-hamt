@@ -137,10 +137,10 @@ public class NodeWrapper<T, V> extends BaseNode<T, V> {
         return wrapper;
     }
 
-    private void clean(final NodeWrapper<T, V> nd, final SpatialConcurrentTrieMap<T, V> ct, int offset) {
-        BaseNode<T, V> m = nd.getGCAS(ct);
+    private void clean(final NodeWrapper<T, V> nd, final SpatialConcurrentTrieMap<T, V> instance, int offset) {
+        BaseNode<T, V> m = nd.getGCAS(instance);
         if (m instanceof BranchNode<T, V> cn) {
-            nd.setGCAS(cn, cn.toCompressed(ct, offset, gen), ct);
+            nd.setGCAS(cn, cn.toCompressed(instance, offset, gen), instance);
         }
     }
 
@@ -290,7 +290,7 @@ public class NodeWrapper<T, V> extends BaseNode<T, V> {
                             }
                             else {
                                 BranchNode<T, V> rn = (cn.gen == gen) ? cn : cn.renewed(gen, instance);
-                                BaseNode<T, V> nn = rn.updatedAt (pos, wrap(BranchNode.dual(sn, new LeafNode<>(key, value, key.getAddress(), sn.res), cn.res == 0 ? offset : offset + 3, gen, sn.res + 1)), gen);
+                                BaseNode<T, V> nn = rn.updatedAt (pos, wrap(BranchNode.dual(sn, new LeafNode<>(key, value, key.getAddress(), sn.res), cn.res == 0 ? offset : offset + 3, gen, rn.res + 1)), gen);
                                 if (setGCAS(cn, nn, instance)) {
                                     return Optional.empty(); // None;
                                 }
@@ -307,7 +307,7 @@ public class NodeWrapper<T, V> extends BaseNode<T, V> {
                             }
                             else {
                                 BranchNode<T, V> rn = (cn.gen == gen) ? cn : cn.renewed(gen, instance);
-                                BaseNode<T, V> nn = rn.updatedAt(pos, wrap(BranchNode.dual(sn, new LeafNode<>(key, value, key.getAddress(), sn.res), cn.res == 0 ? offset : offset + 3, gen, sn.res + 1)), gen);
+                                BaseNode<T, V> nn = rn.updatedAt(pos, wrap(BranchNode.dual(sn, new LeafNode<>(key, value, key.getAddress(), sn.res), cn.res == 0 ? offset : offset + 3, gen, rn.res + 1)), gen);
                                 if (setGCAS(cn, nn, instance)) {
                                     return Optional.empty(); // None
                                 }
