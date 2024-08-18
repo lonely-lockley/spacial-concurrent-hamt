@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @State(value = Scope.Thread)
-@Fork(value = 1)
+@Fork(value = 1, jvmArgs = {"-Xms1G", "-Xmx1G", "-XX:ActiveProcessorCount=1"})
 @Threads(1)
 public class CompareCopySpeed extends TestBase<String> {
 

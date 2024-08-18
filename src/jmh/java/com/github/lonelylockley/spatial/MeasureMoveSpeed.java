@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @State(value = Scope.Benchmark)
-@Fork(value = 1)
+@Fork(value = 1, jvmArgs = {"-Xms1G", "-Xmx1G", "-XX:ActiveProcessorCount=2"})
 @Threads(2)
 public class MeasureMoveSpeed extends TestBase<String> {
 
