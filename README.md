@@ -6,6 +6,8 @@
 
 Please note, that since H3 cell id has more levels than an average hash trie (base cell + 15 resolution levels), basic map operations are expected to be slower that in the original implementation. Performance test results to compare various implementations will be added later.
 
+A detailed tech writeup about this implementation may be found at [medium.com](https://medium.com/@lonelylockley/combining-h3-hexagons-and-ctries-for-effective-spatial-search-eafedb9a8dc8)
+
 ## Main Terms Used In The Implementation
 - CellId: An H3 cell id with an arbitrary resolution in a form of a *long* number, ar hexadecimal *string*. It is believed that the best performance results may be achieved by using r15 for objects stored in the map. In this case update contention should be lower and you'll be able to choose any suitable resolution in search requests.
 - BusinessEntityID: A unique identifier of a business entity that will be used as a map value. It is used to distinct different values in case of a cell collision.
